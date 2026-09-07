@@ -6,3 +6,4 @@ web-build/
 .DS_Store
 android/
 ios/
+build-output/club-tuturno-v1-arm64-adaptive.apk
