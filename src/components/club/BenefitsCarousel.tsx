@@ -129,6 +129,28 @@ const BENEFIT_MOSAIC: readonly Placement[] = [
   { motif: 'coin', x: 20, y: 92, size: 24, rotate: 14 },
 ];
 
+/*
+  The same field, re-placed for a short stage.
+
+  The placements above are percentages of the stage's height, and they are
+  positioned to fall in the gaps a TALL stage leaves — the piggy at 68% sits
+  under the medal, clear of the tier name. A compact stage drops its padding,
+  so those same percentages land on top of the type instead of beside it.
+
+  This set keeps the motifs hard against the left and right edges and out of
+  the vertical centre, where the medal and the label live. Smaller, too: the
+  field should read as surface on a card half the height, not as artwork
+  competing for it.
+*/
+const BENEFIT_MOSAIC_COMPACT: readonly Placement[] = [
+  { motif: 'coin', x: 6, y: 14, size: 24, rotate: -16 },
+  { motif: 'bank', x: 95, y: 16, size: 22, rotate: 12 },
+  { motif: 'piggy', x: 2, y: 52, size: 30, rotate: -12 },
+  { motif: 'sign', x: 98, y: 55, size: 24, rotate: 16 },
+  { motif: 'euro', x: 93, y: 90, size: 24, rotate: -10 },
+  { motif: 'coin', x: 5, y: 88, size: 20, rotate: 14 },
+];
+
 /**
  * The Club's benefits, one medal per slide.
  *
@@ -152,7 +174,15 @@ export function BenefitsCarousel({
 }: BenefitsCarouselProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
+
+  /*
+    The same short-screen threshold the Club screen uses, measured here because
+    the sheet is its own full-screen Modal rather than a child of that layout.
+    On a short device the stage gives back its generous padding so the facts
+    below the medal stay on screen.
+  */
+  const compact = height - insets.top - insets.bottom < 700;
 
   const startIndex = Math.max(
     0,
@@ -287,7 +317,13 @@ export function BenefitsCarousel({
           onMomentumScrollEnd={(event) => {
             setIndex(Math.round(event.nativeEvent.contentOffset.x / slideWidth));
           }}
-          style={{ width: slideWidth }}
+          /*
+            `flex: 1` claims the space left between the header and the controls
+            rather than sizing to the tallest slide. That is what bounds each
+            slide's own vertical ScrollView, so a slide that does not fit
+            scrolls instead of squeezing.
+          */
+          style={{ width: slideWidth, flex: 1 }}
         >
           {SLIDES.map((slide, slideIndex) => (
             <Slide
@@ -299,6 +335,7 @@ export function BenefitsCarousel({
               // at once behind a viewport that shows one is work the device
               // does for nobody.
               active={visible && slideIndex === index}
+              compact={compact}
             />
           ))}
         </ScrollView>
@@ -361,11 +398,14 @@ function Slide({
   width,
   isCurrent,
   active,
+  compact,
 }: {
   slide: TierSlide;
   width: number;
   isCurrent: boolean;
   active: boolean;
+  /** Short screen: the stage trades its generous padding for content room. */
+  compact: boolean;
 }) {
   const theme = useTheme();
   const gradient = theme.surface.tierGradient[slide.tier];
@@ -437,7 +477,12 @@ function Slide({
         Everything factual sits on the neutral cards below it, which is what
         keeps the colour from having to carry information it cannot.
       */}
-      <View style={styles.stage}>
+      <View
+        style={[
+          styles.stage,
+          compact && { paddingVertical: spacing.base, gap: spacing.sm },
+        ]}
+      >
         <LinearGradient
           colors={gradient}
           start={{ x: 0, y: 0 }}
@@ -445,9 +490,12 @@ function Slide({
           style={StyleSheet.absoluteFill}
         />
         <MoneyPattern
-          placements={BENEFIT_MOSAIC}
+          placements={compact ? BENEFIT_MOSAIC_COMPACT : BENEFIT_MOSAIC}
           color={theme.text.onBrand}
-          opacity={0.12}
+          // Fainter on a short stage: the motifs sit closer to the type there,
+          // so the same 0.12 that reads as engraving on a tall card reads as a
+          // second layer of marks behind the tier name.
+          opacity={compact ? 0.09 : 0.12}
         />
         {/*
           A reflection crossing the metal, drawn as a gradient rather than a
@@ -698,7 +746,20 @@ function Arrow({
 
 const styles = StyleSheet.create({
   backdrop: {
-    flex: 1,
+    /*
+      Absolute, not `flex: 1`.
+
+      In flow the backdrop claims the whole modal and the sheet's definite
+      height stacks on top of it, pushing the sheet off the bottom of the
+      screen. Taking it out of flow leaves the sheet as the only laid-out
+      child, so its height resolves against the modal and the pager below it
+      gets a real box to fill.
+    */
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
   },
   sheet: {
     borderTopLeftRadius: radius.xl,
@@ -707,9 +768,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     gap: spacing.base,
-    // The carousel needs a predictable height or every slide sizes to its own
-    // content and the sheet resizes as the user pages through it.
-    maxHeight: '92%',
+    /*
+      A fixed height, not a ceiling.
+
+      `maxHeight` let the sheet size to its tallest slide, which meant the
+      slides had no bounded height to scroll against: on a short screen the
+      content had nowhere to go and compressed instead of scrolling. A definite
+      height gives the pager a box to fill and each slide something to overflow,
+      and it also holds the sheet still as the user pages between medals.
+    */
+    height: '92%',
+    // Anchored to the bottom: with the backdrop out of flow there is nothing
+    // above the sheet to push it down, and a sheet that slides up should end
+    // its travel at the bottom edge.
+    marginTop: 'auto',
   },
   grabber: {
     alignSelf: 'center',
@@ -737,6 +809,10 @@ const styles = StyleSheet.create({
   slide: {
     gap: spacing.md,
     paddingBottom: spacing.base,
+    // Fills the pager when the slide is shorter than the box, so a tall screen
+    // gets the stage sitting on its own space instead of the whole slide
+    // bunched against the header.
+    flexGrow: 1,
   },
   stage: {
     alignItems: 'center',

@@ -35,6 +35,8 @@ import {
   radius,
   spacing,
   useTheme,
+  scaled,
+  scaledMin,
 } from '../../theme';
 
 interface ClubHeroProps {
@@ -43,7 +45,16 @@ interface ClubHeroProps {
   progress: ClubPointsProgress;
   onOpenBenefits: () => void;
   onBack?: () => void;
+  /**
+   * Binary decisions only: which type variant to use, whether an ornament is
+   * shown at all. Anything with a size goes through `scale` instead.
+   */
   compact?: boolean;
+  /**
+   * The screen's vertical scale, 0.78–1. Defaults to 1 so this hero renders at
+   * its authored proportions wherever it is used outside the Club screen.
+   */
+  scale?: number;
   mascotMood?: Exclude<ClubMascotMood, 'dance'> | null;
 }
 
@@ -114,7 +125,7 @@ const HERO_MOSAIC: readonly Placement[] = [
  * identical navy tiles would make Bronce and Diamante look like the same
  * achievement, when the whole product is an argument that they are not.
  */
-export function ClubHero({ club, progress, onOpenBenefits, onBack, compact = false, mascotMood = null }: ClubHeroProps) {
+export function ClubHero({ club, progress, onOpenBenefits, onBack, compact = false, scale = 1, mascotMood = null }: ClubHeroProps) {
   const theme = useTheme();
   const reducedMotion = useReducedMotion();
   const [lightSize, setLightSize] = useState({ width: 0, height: 0 });
@@ -221,7 +232,21 @@ export function ClubHero({ club, progress, onOpenBenefits, onBack, compact = fal
           locations={[0, 0.6, 1]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={[styles.identity, onBack && { paddingTop: 52 }, compact && { paddingBottom: 8, paddingHorizontal: 20 }]}
+          style={[
+            styles.identity,
+            {
+              paddingVertical: scaled(spacing.lg, scale),
+              paddingHorizontal: scaledMin(spacing.lg, scale, spacing.base),
+              gap: scaledMin(spacing.base, scale, spacing.sm),
+            },
+            /*
+              Room for the back button that floats over this card. It is a
+              clearance, not a proportion — scaled below its floor the button
+              would sit on the tier name — so it shrinks only as far as the
+              control's own height allows.
+            */
+            onBack && { paddingTop: scaledMin(52, scale, 44) },
+          ]}
         >
           <View style={StyleSheet.absoluteFill} pointerEvents="none"
             onLayout={({ nativeEvent: { layout } }) => setLightSize((current) =>
@@ -301,13 +326,30 @@ export function ClubHero({ club, progress, onOpenBenefits, onBack, compact = fal
           <Animated.View style={[medalStyle, mascotMood && styles.mascotStage]}>
             {mascotMood ? (
               <>
-                <TutuMascot mood={mascotMood} size={compact ? 64 : 92} />
+                {/*
+                  Each of these keeps its own floor rather than sharing one.
+
+                  The mascot stops reading as a character below 60; the seal
+                  beside it is already small enough that a couple of points off
+                  turns the tier's engraving into a smudge, so it barely moves.
+                */}
+                <TutuMascot mood={mascotMood} size={scaledMin(92, scale, 60)} />
                 <View style={styles.mascotMedal}>
-                  <InteractiveTierMedal tier={tier} size={compact ? 26 : 34} />
+                  <InteractiveTierMedal tier={tier} size={scaledMin(34, scale, 26)} />
                 </View>
               </>
             ) : (
-              <InteractiveTierMedal tier={tier} size={compact ? 44 : 88} />
+              /*
+                Without the mascot the medal is the hero's subject, so it is
+                drawn large — and the compact step is a deliberate halving, not
+                a proportional trim: at that point it stops being the subject
+                and becomes a seal beside the tier name. The scale then works
+                within whichever of those two roles the medal is playing.
+              */
+              <InteractiveTierMedal
+                tier={tier}
+                size={compact ? scaledMin(44, scale, 38) : scaled(88, scale)}
+              />
             )}
           </Animated.View>
         </LinearGradient>
@@ -315,7 +357,11 @@ export function ClubHero({ club, progress, onOpenBenefits, onBack, compact = fal
         <View
           style={[
             styles.body,
-            onBack && { paddingVertical: compact ? 8 : 12, paddingHorizontal: 24, gap: 8 },
+            onBack && {
+              paddingVertical: scaledMin(12, scale, 6),
+              paddingHorizontal: 24,
+              gap: scaledMin(8, scale, 4),
+            },
             {
               backgroundColor: theme.surface.raised,
               borderTopColor: theme.border.subtle,
@@ -477,8 +523,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: spacing.base,
-    padding: spacing.lg,
+    // Padding and gap are applied inline from the vertical scale.
   },
   sheen: {
     position: 'absolute',

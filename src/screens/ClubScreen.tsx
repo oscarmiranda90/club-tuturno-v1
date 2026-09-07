@@ -15,7 +15,7 @@ import {
   type ClubPointsProgressPayload,
 } from '../domain';
 import type { ClubSnapshot } from '../data/clubContract';
-import { spacing, useTheme } from '../theme';
+import { spacing, useTheme, verticalScale, scaled } from '../theme';
 
 function ClubWash() {
   const theme = useTheme();
@@ -85,7 +85,19 @@ function ClubContent({ data, onBack, pointsProgress }: {
   const [benefitsOpen, setBenefitsOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
   const club = data.club;
-  const compact = height > 0 && height - insets.top - insets.bottom < 700;
+  /*
+    One factor, derived from the height this screen was actually given.
+
+    Everything below sizes against it instead of against a breakpoint, so a
+    phone 40pt shorter loses 40pt worth of proportion rather than crossing into
+    a different layout. `compact` survives for the handful of decisions that
+    genuinely are binary — swapping a type variant, dropping an ornament — but
+    it is now derived from the scale rather than measured separately, so the
+    two can never disagree about how much room there is.
+  */
+  const usableHeight = height > 0 ? height - insets.top - insets.bottom : 0;
+  const scale = verticalScale(usableHeight);
+  const compact = scale < 0.94;
   const mascotMood = mascotMoodForClub(club, data.isDelinquent, data.hasActiveSan);
   const heroPointsProgress = resolveClubPointsProgress(club, pointsProgress);
 
@@ -94,13 +106,24 @@ function ClubContent({ data, onBack, pointsProgress }: {
       style={[styles.root, { backgroundColor: theme.surface.canvas }]}>
       <ClubWash />
       <MoneyPattern />
-      <View style={[styles.content, { paddingTop: insets.top, paddingBottom: Math.max(insets.bottom, 8) }]}>
+      <View style={[styles.content, {
+        paddingTop: insets.top,
+        paddingBottom: Math.max(insets.bottom, 8),
+        // The gap between sections is the cheapest height on the screen: it
+        // separates blocks that are already separated by their own surfaces.
+        gap: scaled(spacing.sm, scale),
+      }]}>
         <ClubHero club={club} progress={heroPointsProgress} mascotMood={mascotMood}
-          onBack={onBack} compact={compact} onOpenBenefits={() => setBenefitsOpen(true)} />
-        <StreakThermometer club={club} blocked={data.isDelinquent} compact={compact} />
+          onBack={onBack} compact={compact} scale={scale} onOpenBenefits={() => setBenefitsOpen(true)} />
+        <StreakThermometer club={club} blocked={data.isDelinquent} compact={compact} scale={scale} />
         <Pressable onPress={() => setRulesOpen(true)} accessibilityRole="button"
           accessibilityLabel="Leer los términos completos del Club"
-          style={({ pressed }) => [styles.rulesButton, { opacity: pressed ? 0.6 : 1 }]}>
+          style={({ pressed }) => [
+            styles.rulesButton,
+            // The 48pt touch target is a floor, not a proportion: it stays put
+            // however short the screen is. Only the row's own bulk gives way.
+            { opacity: pressed ? 0.6 : 1 },
+          ]}>
           <Text variant="label" color="secondary">Términos del Club</Text>
           <Svg width={16} height={16} viewBox="0 0 24 24">
             <Path d="M9 6l6 6-6 6" stroke={theme.text.secondary} strokeWidth={2}
@@ -116,6 +139,7 @@ function ClubContent({ data, onBack, pointsProgress }: {
 
 const styles = StyleSheet.create({
   root: { flex: 1, overflow: 'hidden' },
-  content: { flex: 1, gap: spacing.sm },
+  // `gap` is applied inline from the vertical scale.
+  content: { flex: 1 },
   rulesButton: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, marginHorizontal: 64 },
 });

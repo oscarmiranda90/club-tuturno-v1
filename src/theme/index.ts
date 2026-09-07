@@ -21,3 +21,5 @@ export {
   touchTarget,
   duration,
 } from './spacing';
+
+export { verticalScale, scaled, scaledMin, DESIGN_HEIGHT } from './scale';

@@ -17,7 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Text } from '../Text';
 import { TutuMascot } from '../TutuMascot';
 import { benefitsForStep, type ClubState } from '../../domain';
-import { borderCurve, fontFamily, useTheme } from '../../theme';
+import { borderCurve, fontFamily, useTheme, scaled, scaledMin } from '../../theme';
 
 const MAX_STREAK = 12;
 // Each landmark owns its colour until the user has gone beyond it. At that
@@ -36,10 +36,16 @@ interface StreakMeterCelebration {
 }
 
 /** Capacity comes from the earned step; partial progress only fills the meter. */
-export function StreakThermometer({ club, blocked, compact, celebration }: {
+export function StreakThermometer({ club, blocked, compact, scale = 1, celebration }: {
   club: Pick<ClubState, 'streak'>;
   blocked: boolean;
   compact: boolean;
+  /**
+   * The screen's vertical scale, 0.78–1. Sizes everything that can give a
+   * little; `compact` still drives the few choices that are genuinely binary.
+   * Defaults to 1 for callers that render this outside the Club screen.
+   */
+  scale?: number;
   /** Replays the exact Club meter after a confirmed punctual payment. */
   celebration?: StreakMeterCelebration;
 }) {
@@ -134,14 +140,17 @@ export function StreakThermometer({ club, blocked, compact, celebration }: {
         : theme.status.danger;
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { paddingTop: scaled(8, scale), paddingBottom: scaled(4, scale) }]}>
       <View style={styles.heading}>
         <Text variant="labelSm" color="accent">RACHA DE SANES PERFECTOS</Text>
         <Text variant="labelSm" color="secondary">
           {isOverCap ? `${actualCount} · tope ${MAX_STREAK}` : `${count} / ${MAX_STREAK}`}
         </Text>
       </View>
-      <View style={styles.scene} onLayout={(event) => setHeight(event.nativeEvent.layout.height)}>
+      <View
+        style={[styles.scene, { marginTop: scaled(8, scale) }]}
+        onLayout={(event) => setHeight(event.nativeEvent.layout.height)}
+      >
         <View style={styles.meter} accessible accessibilityRole="progressbar"
           accessibilityLabel={isOverCap
             ? `Racha de SANes perfectos: ${actualCount}. El tope de beneficios es ${MAX_STREAK}.`
@@ -212,8 +221,19 @@ export function StreakThermometer({ club, blocked, compact, celebration }: {
             }]} />
           </Animated.View>
         </View>
-        <View style={styles.companion}>
-          <View style={[styles.bubble, compact && { padding: 12 }, { backgroundColor: theme.surface.raised, borderColor: theme.text.primary }]}>
+        <View style={[styles.companion, {
+          paddingTop: scaled(12, scale),
+          paddingBottom: scaled(8, scale),
+        }]}>
+          <View style={[styles.bubble, {
+            paddingVertical: scaledMin(14, scale, 7),
+            paddingHorizontal: scaledMin(12, scale, 10),
+            // The gap between the two lines never reaches zero: at 0 the title
+            // and the sentence read as one run-on block.
+            gap: scaledMin(4, scale, 2),
+            backgroundColor: theme.surface.raised,
+            borderColor: theme.text.primary,
+          }]}>
             <Text variant={compact ? 'label' : 'titleSm'} style={styles.center}>
               {celebration
                 ? celebration.arrived ? `¡RACHA DE ${celebration.to}!` : `Racha de ${celebration.from}`
@@ -229,10 +249,19 @@ export function StreakThermometer({ club, blocked, compact, celebration }: {
             <View style={[styles.tail, { backgroundColor: theme.surface.raised,
               borderBottomColor: theme.text.primary, borderRightColor: theme.text.primary }]} />
           </View>
-          <TutuMascot mood="idle" size={compact ? 104 : 148} />
+          {/*
+            The mascot rides the scale rather than dropping to a second fixed
+            size. Its floor is 96: below that the face stops being readable as
+            a face and it is just a coloured blob taking up the same column.
+          */}
+          <TutuMascot mood="idle" size={scaledMin(148, scale, 96)} />
         </View>
       </View>
-      <Text variant="labelSm" color="secondary" style={styles.caption}>
+      <Text
+        variant="labelSm"
+        color="secondary"
+        style={[styles.caption, { paddingTop: scaled(8, scale) }]}
+      >
         {benefits.zeroCommissionSan
           ? '1 SAN sin comisión en Modelo Juntos, mientras tu racha siga perfecta.'
           : 'Completa SANes con todos sus pagos a tiempo para subir tu racha.'}
@@ -242,9 +271,11 @@ export function StreakThermometer({ club, blocked, compact, celebration }: {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, minHeight: 0, paddingTop: 8, paddingBottom: 4 },
+  // Vertical padding throughout this file is applied inline from the scale;
+  // what stays here is everything the screen's height has no say over.
+  root: { flex: 1, minHeight: 0 },
   heading: { flexDirection: 'row', justifyContent: 'space-between', gap: 8, paddingHorizontal: 24 },
-  scene: { flex: 1, minHeight: 0, flexDirection: 'row', marginTop: 8 },
+  scene: { flex: 1, minHeight: 0, flexDirection: 'row' },
   meter: { width: 104 },
   track: { position: 'absolute', left: -24, width: 72, top: 20, bottom: 20,
     borderWidth: 1, borderRadius: 24, borderCurve },
@@ -261,12 +292,12 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', borderTopRightRadius: 8, borderBottomRightRadius: 8 },
   markerPoint: { position: 'absolute', right: -7, borderTopWidth: 7, borderBottomWidth: 7,
     borderLeftWidth: 8, borderTopColor: 'transparent', borderBottomColor: 'transparent' },
-  companion: { flex: 1, minWidth: 0, paddingRight: 24, paddingLeft: 4, paddingTop: 12, paddingBottom: 8, alignItems: 'center' },
-  bubble: { paddingVertical: 14, paddingHorizontal: 12, gap: 4, borderWidth: 2,
+  companion: { flex: 1, minWidth: 0, paddingRight: 24, paddingLeft: 4, alignItems: 'center' },
+  bubble: { borderWidth: 2,
     // Keep the cloud close to its longest line instead of spanning the companion column.
     borderRadius: 24, borderCurve, width: '80%', maxWidth: 190 },
   center: { textAlign: 'center' },
   tail: { position: 'absolute', bottom: -8, left: '46%', width: 14, height: 14,
     transform: [{ rotate: '45deg' }], borderBottomWidth: 2, borderRightWidth: 2 },
-  caption: { textAlign: 'center', paddingHorizontal: 24, paddingTop: 8 },
+  caption: { textAlign: 'center', paddingHorizontal: 24 },
 });
