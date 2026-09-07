@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Club TuTurno V1",
+    "slug": "club-tuturno-v1",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "clubtuturnov1",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#FFFFFF",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.tuturno.club.v1.demo"
+    },
+    "android": {
+      "package": "com.tuturno.club.v1.demo",
+      "adaptiveIcon": {
+        "backgroundColor": "#000F5C",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "backgroundColor": "#0023D1",
+          "resizeMode": "contain",
+          "imageWidth": 200
+        }
+      ],
+      "expo-image"
+    ]
+  }
+}
