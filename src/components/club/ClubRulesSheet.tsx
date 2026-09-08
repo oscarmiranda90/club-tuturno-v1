@@ -86,6 +86,14 @@ const SECTIONS: readonly Section[] = [
       {
         text: 'Los puntos vienen únicamente de pagos de cuotas. No hay puntos por referir, por activar notificaciones ni por ninguna otra acción.',
       },
+      {
+        term: 'La hora que vale',
+        text: 'Es la del registro de confirmación del pago en los sistemas de TuTurno, no la de tu dispositivo.',
+      },
+      {
+        term: 'Qué son y qué no son',
+        text: 'Los puntos no tienen valor monetario, no se canjean por dinero, no se transfieren entre usuarios y no son un instrumento financiero.',
+      },
     ],
   },
   {
@@ -139,7 +147,18 @@ const SECTIONS: readonly Section[] = [
         term: 'Las condiciones se congelan al abrir',
         text: 'Un SAN que arranca al 0% termina al 0%, incluso si caes en mora en el camino. Nunca se cobra comisión sobre las cuotas restantes de un SAN en curso.',
       },
+      {
+        term: 'El siguiente SAN se hereda con la racha activa',
+        text: 'Al culminar tu SAN al 0%, el próximo que abras hereda el beneficio, siempre que tu racha de 12 SANes perfectos siga activa.',
+      },
+      {
+        term: 'Si lo pierdes, se recupera',
+        text: 'Caída la racha, completa 6 SANes perfectos consecutivos y el beneficio vuelve.',
+      },
       { text: 'En Modelo Premium no hay 0% ni descuento, en ningún nivel.' },
+      {
+        text: 'El beneficio recae únicamente sobre la comisión de servicio de TuTurno. Tu obligación de pagar las cuotas del SAN se mantiene íntegra en todos los casos.',
+      },
     ],
   },
   {
@@ -157,6 +176,8 @@ const SECTIONS: readonly Section[] = [
   },
   {
     title: 'Qué pasa si te atrasas',
+    intro:
+      'Un episodio de mora empieza con tu primera cuota vencida sin pagar y termina cuando pones al día todas las cuotas vencidas y sus recargos. Todo lo que sigue se cuenta por episodio, no por cuota.',
     rules: [
       {
         term: 'Tu medalla y tus puntos no se tocan',
@@ -193,7 +214,11 @@ const SECTIONS: readonly Section[] = [
     title: 'Inactividad',
     rules: [
       {
-        text: 'Si pasas 6 meses sin participar en un SAN y sin iniciar sesión, tus puntos vencen — pero conservas tu medalla. Al volver acumulas desde 0 puntos manteniendo el nivel que alcanzaste.',
+        term: 'Hacen falta las dos cosas',
+        text: 'Los puntos vencen tras 6 meses continuos sin participar en ningún SAN y sin iniciar sesión en la app. Basta con cualquiera de las dos para conservarlos: abrir la app ya cuenta.',
+      },
+      {
+        text: 'El vencimiento no afecta la medalla, que se conserva en todos los casos. Al volver acumulas desde 0 puntos manteniendo el nivel que alcanzaste.',
       },
     ],
   },
@@ -204,7 +229,23 @@ const SECTIONS: readonly Section[] = [
         text: 'Los montos, la escalera y la tasa de puntos son parámetros de cada país y se expresan en su moneda local. La mecánica es la misma en todos; solo cambian las cifras.',
       },
       {
-        text: 'El programa de referidos no forma parte del Club: no otorga puntos ni afecta medallas o rachas.',
+        text: 'El programa de referidos no forma parte del Club: no otorga puntos ni afecta medallas o rachas, y se rige por sus propios términos.',
+      },
+    ],
+  },
+  {
+    title: 'Participación y cambios',
+    rules: [
+      {
+        term: 'Entrar no cuesta nada',
+        text: 'El Club es un programa de fidelización gratuito. La participación es automática para todo usuario activo: no hay inscripción ni costo alguno.',
+      },
+      {
+        term: 'Si las reglas cambian, te avisamos',
+        text: 'TuTurno puede modificar las reglas del Club notificándote por la app con antelación razonable. Ningún cambio afecta las medallas alcanzadas, los puntos acumulados ni los montos ya desbloqueados al momento de entrar en vigencia.',
+      },
+      {
+        text: 'Participar en el Club implica aceptar estos términos y los Términos y Condiciones Generales de TuTurno, que aplican en todo lo no previsto aquí.',
       },
     ],
   },

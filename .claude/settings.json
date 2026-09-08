@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(eza -la --git-ignore /Volumes/CORSAIR/tuturno/club-tuturno-v1)",
-      "Bash(bat --plain /Volumes/CORSAIR/tuturno/club-tuturno-v1/package.json)"
+      "Bash(bat --plain /Volumes/CORSAIR/tuturno/club-tuturno-v1/package.json)",
+      "Bash(eza -a --level=1 /Volumes/CORSAIR/tuturno/club-tuturno-v1)",
+      "Bash(xcrun simctl *)",
+      "Read(//Applications/Xcode.app/**)"
     ]
   }
 }

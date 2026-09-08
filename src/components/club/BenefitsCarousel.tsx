@@ -61,7 +61,7 @@ interface TierSlide {
   /** The caption above the amount: "Hasta", or "Desde" at Diamante. */
   amountCaption: string;
   amount: string;
-  /** The perfect-SAN condition and what it opens. */
+  /** What the medal itself grants — lane 1, and nothing else. */
   unlock: string;
 }
 
@@ -80,7 +80,7 @@ const SLIDES: readonly TierSlide[] = [
     standing: 'Tu punto de partida en el Club.',
     amountCaption: 'Hasta',
     amount: money(TIERS[0].maxSanAmount),
-    unlock: 'Acceso a la app y a tu primer SAN. Juegas 1 SAN a la vez.',
+    unlock: `Entras al Club automáticamente, sin inscribirte. Desde tu primer pago a tiempo empiezas a sumar puntos hacia ${money(TIERS[1].maxSanAmount)}.`,
   },
   {
     tier: 'plata',
@@ -89,7 +89,7 @@ const SLIDES: readonly TierSlide[] = [
     standing: 'Vas creciendo dentro del Club.',
     amountCaption: 'Hasta',
     amount: money(TIERS[1].maxSanAmount),
-    unlock: 'Completa 3 SANes perfectos y juegas 2 SANes a la vez.',
+    unlock: `Con 300 puntos duplicas tu monto: de ${money(TIERS[0].maxSanAmount)} a ${money(TIERS[1].maxSanAmount)} por SAN. La medalla es tuya para siempre, pase lo que pase.`,
   },
   {
     tier: 'oro',
@@ -98,7 +98,7 @@ const SLIDES: readonly TierSlide[] = [
     standing: 'Casi en la cima del Club.',
     amountCaption: 'Hasta',
     amount: money(TIERS[2].maxSanAmount),
-    unlock: 'Completa 6 SANes perfectos y juegas 3 SANes a la vez.',
+    unlock: `Con 800 puntos llegas a ${money(TIERS[2].maxSanAmount)} por SAN. Un paso más y entras a Diamante, donde el monto deja de tener tope.`,
   },
   {
     tier: 'diamante',
@@ -107,9 +107,34 @@ const SLIDES: readonly TierSlide[] = [
     standing: 'La cima. Montos sin tope.',
     amountCaption: 'Desde · sin tope',
     amount: money(TIERS[3].maxSanAmount),
-    unlock:
-      'Completa 12 SANes perfectos: juegas 4 a la vez y 1 de tus SANes va al 0% de comisión en Modelo Juntos. Los demás pagan comisión normal.',
+    unlock: `Con 1.500 puntos alcanzas la medalla más alta del Club. Desde ${money(TIERS[3].maxSanAmount)} tu monto ya no tiene tope: sigue creciendo por la escalera.`,
   },
+] as const;
+
+/**
+ * Lane 2, shown on every slide.
+ *
+ * The perfect-SAN steps used to be written into each medal's `unlock`, which
+ * said something untrue by placement alone: that 3 perfect SANes is a Plata
+ * benefit and 12 a Diamante one. They are neither. A Bronce user with 3
+ * perfect SANes plays 2 SANes at once, and a Diamante with a broken streak
+ * plays one.
+ *
+ * The map calls this out as the misconception that costs the Club its value
+ * ("Dos caminos, un solo jugador"), and the fix is structural rather than
+ * verbal: the steps get their own panel, identical on all four slides,
+ * because they ARE identical on all four levels.
+ */
+interface StreakRung {
+  sanes: string;
+  grants: string;
+}
+
+const STREAK_RUNGS: readonly StreakRung[] = [
+  { sanes: 'Inicio', grants: '1 SAN a la vez' },
+  { sanes: '3 perfectos', grants: '2 SANes a la vez' },
+  { sanes: '6 perfectos', grants: '3 SANes a la vez' },
+  { sanes: '12 perfectos', grants: '4 SANes + 1 al 0% en Juntos' },
 ] as const;
 
 /** The ladder rungs, built from the domain constants rather than typed out. */
@@ -579,10 +604,7 @@ function Slide({
         </Text>
       </Animated.View>
 
-      {/*
-        Lane 2, and labelled as a different currency on purpose. "TU BENEFICIO"
-        is the map's own heading for this box.
-      */}
+      {/* Still lane 1: what this medal, by itself, is worth. */}
       <Animated.View
         entering={FadeInDown.duration(duration.normal).delay(110)}
         style={[
@@ -594,13 +616,74 @@ function Slide({
         ]}
       >
         <Text variant="labelSm" color="accent">
-          TU BENEFICIO
+          LO QUE TE DA ESTA MEDALLA
         </Text>
         <Text variant="bodySm">{slide.unlock}</Text>
       </Animated.View>
 
+      <StreakPanel />
+
       {slide.tier === 'diamante' && <LadderPanel />}
     </ScrollView>
+  );
+}
+
+/**
+ * Lane 2 — the perfect-SAN steps, identical on every slide.
+ *
+ * Repeated rather than shown once because the carousel is paged: a user opens
+ * on their own medal and may never reach the slide that carries it. A panel
+ * that appears only under Diamante teaches the opposite of what it says.
+ *
+ * The heading names the independence outright. "Sin importar tu medalla" is
+ * the whole point — this ladder is climbed by paying on time, and a Bronce
+ * user climbs it at exactly the same rate as a Diamante.
+ */
+function StreakPanel() {
+  const theme = useTheme();
+
+  return (
+    <Animated.View
+      entering={FadeInDown.duration(duration.normal).delay(140)}
+      style={[
+        styles.streakPanel,
+        { backgroundColor: theme.surface.raised, borderColor: theme.border.subtle },
+      ]}
+    >
+      <Text variant="labelSm" color="accent">
+        Y APARTE: TUS SANES PERFECTOS
+      </Text>
+      <Text variant="bodySm" color="secondary">
+        Un SAN perfecto es uno que completas pagando todas tus cuotas a tiempo.
+        Esta vía corre por separado y es igual en las cuatro medallas: decide
+        cuántos SANes juegas a la vez, sin importar tu nivel.
+      </Text>
+
+      <View style={styles.streakRows}>
+        {STREAK_RUNGS.map((rung) => (
+          <View key={rung.sanes} style={styles.streakRow}>
+            <View
+              style={[
+                styles.streakChip,
+                { backgroundColor: theme.surface.inset },
+              ]}
+            >
+              <Text variant="labelSm" color="secondary">
+                {rung.sanes}
+              </Text>
+            </View>
+            <Text variant="bodySm" style={styles.streakGrant}>
+              {rung.grants}
+            </Text>
+          </View>
+        ))}
+      </View>
+
+      <Text variant="bodySm" color="muted">
+        Una mora te baja un solo escalón, nunca dos. Tu medalla y tus puntos no
+        se tocan.
+      </Text>
+    </Animated.View>
   );
 }
 
@@ -892,6 +975,33 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderCurve,
     borderWidth: borderWidth.thin,
+  },
+  streakPanel: {
+    gap: spacing.sm,
+    padding: spacing.base,
+    borderRadius: radius.lg,
+    borderCurve,
+    borderWidth: borderWidth.thin,
+  },
+  streakRows: {
+    gap: spacing.xs,
+  },
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  streakChip: {
+    // Fixed width so the four grants line up as a column rather than starting
+    // at four different x positions — the row reads as a ladder that way.
+    width: 96,
+    paddingVertical: spacing['2xs'],
+    paddingHorizontal: spacing.xs,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+  },
+  streakGrant: {
+    flex: 1,
   },
   ladderPanel: {
     gap: spacing.sm,
