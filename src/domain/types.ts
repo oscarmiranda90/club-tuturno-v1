@@ -82,11 +82,17 @@ export type DelinquencyPhase = 'current' | 'grace' | 'locked';
 
 export interface ClubState {
   points: PointsLane;
-  /** Benefit streak based on completed perfect SANes. */
+  /**
+   * Benefit streak based on completed perfect SANes. §3.1
+   *
+   * The Club has exactly one streak. An earlier draft also carried a visible
+   * count of consecutive on-time installments; it was dropped, because paying
+   * on time already has its own reward — points, which raise the medal — and a
+   * second counter next to this one only invited users to read the two as one
+   * mechanic.
+   */
   streak: StreakLane;
   ladder: AmountLadder | null;
-  /** Motivational consecutive-installment streak shown on Home. */
-  cuotaStreak: number;
 }
 
 export type ClubMascotMood = 'idle' | 'sad' | 'angry' | 'dance';

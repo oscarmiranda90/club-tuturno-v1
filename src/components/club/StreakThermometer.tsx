@@ -25,10 +25,20 @@ const MAX_STREAK = 12;
 // tile keeps the user's eye on what comes next.
 const MILESTONES = [3, 6, 9, 12] as const;
 
+/*
+  Named in full, never just "racha".
+
+  The unit is what makes this number mean anything: it counts whole SANes
+  finished without a single late installment, not payments. "Racha: 5" invites
+  the reader to supply their own unit, and the one they reach for is the
+  payment they just made.
+*/
+const LANE_LABEL = 'Racha de SANes perfectos';
+
 interface StreakMeterCelebration {
-  /** The confirmed count before this punctual payment. */
+  /** The confirmed perfect-SAN count before the SAN that just completed. */
   from: number;
-  /** The server-confirmed count after this punctual payment. */
+  /** The server-confirmed perfect-SAN count after that completion. */
   to: number;
   /** Lets the labels change only after the marker has physically arrived. */
   arrived: boolean;
@@ -46,7 +56,7 @@ export function StreakThermometer({ club, blocked, compact, scale = 1, celebrati
    * Defaults to 1 for callers that render this outside the Club screen.
    */
   scale?: number;
-  /** Replays the exact Club meter after a confirmed punctual payment. */
+  /** Replays the exact Club meter after a confirmed perfect SAN. */
   celebration?: StreakMeterCelebration;
 }) {
   const theme = useTheme();
@@ -153,8 +163,8 @@ export function StreakThermometer({ club, blocked, compact, scale = 1, celebrati
       >
         <View style={styles.meter} accessible accessibilityRole="progressbar"
           accessibilityLabel={isOverCap
-            ? `Racha de SANes perfectos: ${actualCount}. El tope de beneficios es ${MAX_STREAK}.`
-            : 'Racha de SANes perfectos'}
+            ? `${LANE_LABEL}: ${actualCount}. El tope de beneficios es ${MAX_STREAK}.`
+            : LANE_LABEL}
           accessibilityValue={{ min: 0, max: MAX_STREAK, now: count }}>
           <View style={[styles.track, { backgroundColor: theme.surface.inset, borderColor: theme.border.subtle }]}>
             <View style={styles.clip}>
@@ -242,9 +252,9 @@ export function StreakThermometer({ club, blocked, compact, scale = 1, celebrati
             <Text variant="bodySm" color="secondary" style={styles.center}>
               {celebration ? celebration.arrived
                 ? 'Tu racha acaba de subir.'
-                : 'Tu cuota perfecta ya está contando.'
-                : blocked ? 'Ponte al día para volver a jugar SANes.' :
-                `Puedes jugar ${benefits.simultaneousSanes} ${benefits.simultaneousSanes === 1 ? 'SAN' : 'SANes'} a la vez.`}
+                : 'Tu SAN perfecto ya está contando.'
+                : blocked ? 'Ponte al día para volver a jugar SANes.'
+                : `Puedes jugar ${benefits.simultaneousSanes} ${benefits.simultaneousSanes === 1 ? 'SAN' : 'SANes'} a la vez.`}
             </Text>
             <View style={[styles.tail, { backgroundColor: theme.surface.raised,
               borderBottomColor: theme.text.primary, borderRightColor: theme.text.primary }]} />

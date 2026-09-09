@@ -4,7 +4,7 @@ import type { ClubSnapshot } from '../data/clubContract';
 import {
   advanceLadder,
   clubUpdateForPayment,
-  streakAfterPunctualPayment,
+  streakAfterCompletedSan,
   streakCount,
   TIERS,
   type PaymentClubUpdate,
@@ -60,19 +60,23 @@ export function useClubDemo() {
     }));
   }, []);
 
-  const increaseStreak = useCallback(() => {
-    const from = streakCount(snapshot.club.streak);
-    const streak = streakAfterPunctualPayment(snapshot.club.streak);
-    const to = streakCount(streak);
-    setStreakCelebration({ from, to });
-    setSnapshot({
-      ...snapshot,
-      club: {
-        ...snapshot.club,
-        streak,
-        cuotaStreak: snapshot.club.cuotaStreak + 1,
-      },
+  /*
+    One SAN carried to the end with every installment on time. §3.1
+
+    This is the only event the streak advances on, and the one the celebration
+    replays — so the demo control opens it. Which finished SANes were perfect is
+    a fact the payment ledger owns; this stands in for it locally.
+
+    A payment is a different thing entirely: it earns points, which raise the
+    medal, and `showPaymentCelebration` covers that.
+  */
+  const completePerfectSan = useCallback(() => {
+    const streak = streakAfterCompletedSan(snapshot.club.streak, false);
+    setStreakCelebration({
+      from: streakCount(snapshot.club.streak),
+      to: streakCount(streak),
     });
+    setSnapshot({ ...snapshot, club: { ...snapshot.club, streak } });
   }, [snapshot]);
 
   const completeDiamondSan = useCallback(() => {
@@ -134,7 +138,7 @@ export function useClubDemo() {
     pointsCelebration,
     streakCelebration,
     setTier,
-    increaseStreak,
+    completePerfectSan,
     completeDiamondSan,
     showPaymentCelebration,
     showTierCelebration,

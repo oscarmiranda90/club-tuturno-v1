@@ -123,12 +123,12 @@ const SECTIONS: readonly Section[] = [
   {
     title: 'Los escalones de la racha',
     rules: [
-      { term: 'Inicio', text: 'Juegas 1 SAN a la vez.' },
-      { term: '3 SANes perfectos', text: 'Juegas 2 SANes a la vez.' },
-      { term: '6 SANes perfectos', text: 'Juegas 3 SANes a la vez.' },
+      { term: 'Inicio', text: 'Puedes jugar 1 SAN a la vez.' },
+      { term: '3 SANes perfectos', text: 'Puedes jugar hasta 2 SANes a la vez.' },
+      { term: '6 SANes perfectos', text: 'Puedes jugar hasta 3 SANes a la vez.' },
       {
         term: '12 SANes perfectos',
-        text: 'Juegas 4 SANes a la vez, y uno de tus SANes va al 0% de comisión en Modelo Juntos.',
+        text: 'Juegas hasta 4 a la vez y 1 de tus SANes con 0% de comisión en Mod. Juntos. Los demás pagan comisión normal.',
       },
       { text: 'Los SANes simultáneos aplican en ambos modelos, y la racha cuenta SANes perfectos de cualquier modelo.' },
     ],

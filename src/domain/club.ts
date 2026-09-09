@@ -48,8 +48,7 @@ export function mascotMoodForClub(
     !hasActiveSan &&
     club.points.points === 0 &&
     club.streak.step === 0 &&
-    club.streak.progressToNext === 0 &&
-    club.cuotaStreak === 0;
+    club.streak.progressToNext === 0;
 
   return isNewAccount ? 'idle' : null;
 }
@@ -228,13 +227,33 @@ export function streakStepForCount(count: number): StreakStep {
 }
 
 /**
- * Advance the Club streak after one punctual installment.
+ * Advance the perfect-SAN streak after a SAN completes. §3.1
+ *
+ * The unit here is a whole SAN, not an installment. A perfect SAN is one
+ * carried from beginning to end with every installment paid on time — five
+ * installments or ten, it counts once, and only on completion.
+ *
+ * This used to advance per punctual payment, which handed out lane 2's real
+ * benefits for a fraction of the work: three on-time installments of a single
+ * SAN bought step 3, where §3.1 asks for three finished SANes. On a ten-payment
+ * SAN that reached step 12 — four simultaneous SANes and the 0% commission —
+ * after twelve installments instead of a hundred and twenty.
+ *
+ * A SAN that carried any late payment does not count. It does not reduce the
+ * streak either: the fall is `stepAfterDelinquency`, driven by the delinquency
+ * episode itself, and charging for the same lateness twice would take two steps
+ * for one mistake.
  *
  * The server will become the authority for this transition; keeping the rule
  * pure gives the app one temporary implementation and one response shape to
  * replace when that endpoint arrives.
  */
-export function streakAfterPunctualPayment(streak: ClubState['streak']): ClubState['streak'] {
+export function streakAfterCompletedSan(
+  streak: ClubState['streak'],
+  wasDelinquent: boolean,
+): ClubState['streak'] {
+  if (wasDelinquent) return streak;
+
   const nextCount = streakCount(streak) + 1;
   const step = streakStepForCount(nextCount);
 
@@ -345,13 +364,13 @@ export interface PaymentClubUpdate {
     earned: number;
     after: number;
   };
-  /** Server-confirmed movement of the Club's punctual-payment streak. */
-  streak: {
-    before: number;
-    after: number;
-    /** Present only when the payment unlocked a new benefit threshold. */
-    milestone: StreakStep | null;
-  };
+  /*
+    No streak field: a payment moves no streak at all.
+
+    Paying on time earns points, and points are what raise the medal. The
+    perfect-SAN streak moves on one event only — a SAN completing with every
+    installment paid on time — and that is `streakAfterCompletedSan`.
+  */
   /** Present only when this payment earned a strictly higher permanent medal. */
   promotion: { from: Tier; to: Tier } | null;
 }
@@ -409,20 +428,16 @@ export function clubUpdateForPayment(
         earned: 0,
         after: club.points.points,
       },
-      streak: {
-        before: streakCount(club.streak),
-        after: streakCount(club.streak),
-        milestone: null,
-      },
       promotion: null,
     };
   }
 
   const totalPoints = club.points.points + reward.points;
-  const nextStreak = streakAfterPunctualPayment(club.streak);
-  const streakBefore = streakCount(club.streak);
-  const streakAfter = streakCount(nextStreak);
-  const milestone = nextStreak.step > club.streak.step ? nextStreak.step : null;
+  /*
+    A payment earns points and nothing else. It does not advance the perfect-SAN
+    streak: §3.1 counts whole SANes finished without a late installment, which is
+    `streakAfterCompletedSan`.
+  */
   const qualifiedTier = tierForPoints(totalPoints);
   const previousIndex = TIERS.findIndex((definition) => definition.tier === club.points.tier);
   const qualifiedIndex = TIERS.findIndex((definition) => definition.tier === qualifiedTier);
@@ -440,14 +455,8 @@ export function clubUpdateForPayment(
       earned: reward.points,
       after: totalPoints,
     },
-    streak: {
-      before: streakBefore,
-      after: streakAfter,
-      milestone,
-    },
     club: {
       ...club,
-      cuotaStreak: club.cuotaStreak + 1,
       points: {
         ...club.points,
         points: totalPoints,
@@ -455,7 +464,8 @@ export function clubUpdateForPayment(
         // medal belongs to the person even if their points later expire.
         tier: promotion?.to ?? club.points.tier,
       },
-      streak: nextStreak,
+      // Lane 2 is untouched by a payment. It moves on SAN completion only.
+      streak: club.streak,
     },
   };
 }
@@ -566,34 +576,26 @@ export const FREQUENCY_DAYS: Record<'semanal' | 'quincenal', number> = {
 };
 
 /**
- * Milestones on the visible installment streak.
- *
- * This streak is NOT lane 2. It grants nothing, generates no points, and resets
- * on a single late payment — it exists because it is the one number a user can
- * move today, where a medal is months away.
- */
-export const CUOTA_MILESTONES = [3, 6, 12, 24];
-
-/** The milestone this payment just reached, if it reached one. */
-export function milestoneReached(streakAfter: number): number | null {
-  return CUOTA_MILESTONES.includes(streakAfter) ? streakAfter : null;
-}
-
-/**
  * The reminder sent the day before an installment is due.
  *
  * Same notification, same timing, same frequency as today — only the content
  * changes. The spec is explicit that volume never rises; what rises is what the
  * message puts at stake.
  *
- * A user with a streak is reminded of what they stand to lose, which is
- * stronger than being reminded of what they owe. A user without one is offered
- * a start.
+ * What is at stake is the SAN in progress: one late installment is what stops it
+ * being perfect, and a perfect SAN is the only thing that moves the streak.
+ * Being reminded of what you stand to lose is stronger than being reminded of
+ * what you owe.
+ *
+ * `hasActiveSan` gates that framing. With no SAN open there is nothing to keep
+ * perfect, so the message offers a start instead of naming a stake that does not
+ * exist.
  */
 export function reminderCopy(
   amount: number,
   club: ClubState,
   hasZeroCommissionSan: boolean,
+  hasActiveSan: boolean,
 ): string {
   const money = moneyExact(amount);
 
@@ -601,8 +603,8 @@ export function reminderCopy(
     return `Mañana vence tu cuota. Tu SAN sin comisión depende de tu racha perfecta — no la sueltes.`;
   }
 
-  if (club.cuotaStreak >= 3) {
-    return `Mañana vence tu cuota de ${money}. Tu racha de ${club.cuotaStreak} pagos perfectos está en juego — no la dejes caer.`;
+  if (hasActiveSan) {
+    return `¡Mañana vence tu cuota de ${money}! Tu SAN perfecto está en juego, no lo dejes caer.`;
   }
 
   return `Mañana vence tu cuota de ${money}. Págala a tiempo y empieza tu racha.`;

@@ -14,7 +14,6 @@ export const INITIAL_DEMO_SNAPSHOT: ClubSnapshot = {
       zeroCommissionSanId: null,
     },
     ladder: null,
-    cuotaStreak: 2,
   },
   isDelinquent: false,
   hasActiveSan: true,

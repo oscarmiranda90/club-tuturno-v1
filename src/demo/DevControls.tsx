@@ -114,7 +114,7 @@ export function DevControls({
       <View style={styles.actions}>
         <Action label="Felicitar pago" onPress={() => run(onPaymentCelebration)} />
         <Action label="Subir de nivel" onPress={() => run(onTierCelebration)} />
-        <Action label="Subir la racha" onPress={() => run(onIncreaseStreak)} />
+        <Action label="Completar SAN perfecto" onPress={() => run(onIncreaseStreak)} />
         <Action label="Avanzar escalera" onPress={() => run(onCompleteDiamondSan)} />
         <Action label="Reiniciar demo" quiet onPress={() => run(onReset)} />
       </View>

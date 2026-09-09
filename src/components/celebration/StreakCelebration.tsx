@@ -14,18 +14,29 @@ import { MoneyPattern } from '../club/MoneyPattern';
 
 interface StreakCelebrationProps {
   visible: boolean;
-  /** Punctual-payment streak immediately before the confirmed payment. */
+  /** Perfect-SAN count immediately before the SAN that just completed. */
   from: number;
-  /** Server-confirmed streak after the confirmed payment. */
+  /** Server-confirmed perfect-SAN count after that completion. */
   to: number;
   onDone: () => void;
 }
 
+/*
+  Lane 2's thresholds. §3.1
+
+  This screen belongs to the perfect-SAN streak — the one that grants
+  simultaneous SANes and the 0% commission. It opens when a SAN COMPLETES with
+  every installment paid on time, which is the only event that moves this
+  counter.
+
+  The unit here is whole SANes. A payment never opens this screen: paying on
+  time earns points, which raise the medal, and that has its own celebration.
+*/
 const MILESTONES: readonly StreakStep[] = [0, 3, 6, 12];
 
 /**
- * A payment replay of the exact meter shown in Club. This component owns only
- * the celebration framing; the meter itself has one visual implementation.
+ * A completion replay of the exact meter shown in Club. This component owns
+ * only the celebration framing; the meter itself has one visual implementation.
  */
 export function StreakCelebration({ visible, from, to, onDone }: StreakCelebrationProps) {
   const theme = useTheme();
@@ -71,7 +82,7 @@ export function StreakCelebration({ visible, from, to, onDone }: StreakCelebrati
         <MoneyPattern color={theme.text.onBrand} opacity={0.12} />
         <View style={[styles.body, { paddingTop: insets.top + spacing.xl }]}>
           <Text variant="labelSm" style={styles.center}>
-            {arrived ? 'PAGO PERFECTO CONFIRMADO' : 'TU RACHA ESTÁ SUBIENDO'}
+            {arrived ? 'SAN PERFECTO CONFIRMADO' : 'TU RACHA ESTÁ SUBIENDO'}
           </Text>
 
           <View style={styles.meterFrame}>
@@ -96,7 +107,7 @@ export function StreakCelebration({ visible, from, to, onDone }: StreakCelebrati
               ) : nextMilestone && nextBenefits ? (
                 <View style={[styles.benefits, { backgroundColor: theme.surface.brandInset }]}>
                   <Text variant="titleSm" color="onBrand" style={styles.center}>
-                    {nextMilestone - to} {nextMilestone - to === 1 ? 'cuota perfecta más' : 'cuotas perfectas más'} y llegas a {nextMilestone}
+                    {nextMilestone - to} {nextMilestone - to === 1 ? 'SAN perfecto más' : 'SANes perfectos más'} y llegas a {nextMilestone}
                   </Text>
                   <Text variant="labelSm" color="onBrandMuted">AL LLEGAR OBTIENES</Text>
                   <Benefit label={`Hasta ${nextBenefits.simultaneousSanes} SANes a la vez`} />

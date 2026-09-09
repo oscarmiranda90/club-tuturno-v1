@@ -316,7 +316,7 @@ export function PointsCelebration({
                     BENEFICIOS DESBLOQUEADOS
                   </Text>
                   <Unlock label={`Puedes abrir SANes de hasta ${money(maxAmountForTier(tierAfter))}`} />
-                  <Unlock label="Tu medalla es tuya para siempre" />
+                  <Unlock label="Esta Medalla es tuya para siempre" />
                 </View>
               </Animated.View>
             ) : (

@@ -6,7 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { StaticTierMedal } from '../club/StaticTierMedal';
 
 import { Text } from '../Text';
-import { progressToNextTier, type ClubState } from '../../domain';
+import { progressToNextTier, streakCount, type ClubState } from '../../domain';
 import { radius, borderCurve, spacing, duration, useTheme } from '../../theme';
 
 interface ClubProgressProps {
@@ -38,6 +38,7 @@ const TIER_LABEL: Record<string, string> = {
 export function ClubProgress({ club, onPress, tone = 'default' }: ClubProgressProps) {
   const theme = useTheme();
   const progress = progressToNextTier(club);
+  const perfectSanes = streakCount(club.streak);
   const isGreen = tone === 'green';
   const foreground = isGreen ? theme.action.primaryText : theme.text.primary;
   const secondary = isGreen ? theme.action.primaryText : theme.text.secondary;
@@ -80,7 +81,15 @@ export function ClubProgress({ club, onPress, tone = 'default' }: ClubProgressPr
 
         <View style={styles.spacer} />
 
-        {club.cuotaStreak > 0 && (
+        {/*
+          The perfect-SAN streak, the Club's only streak.
+
+          This chip used to show a separate count of consecutive on-time
+          installments. That counter is gone: paying on time is already paid for
+          in points, and a second number beside this one taught users that the
+          two were the same mechanic.
+        */}
+        {perfectSanes > 0 && (
           <View
             style={[
               styles.streak,
@@ -106,7 +115,7 @@ export function ClubProgress({ club, onPress, tone = 'default' }: ClubProgressPr
               />
             </Svg>
             <Text variant="labelSm" style={{ color: secondary }}>
-              Racha: {club.cuotaStreak}
+              {perfectSanes} {perfectSanes === 1 ? 'SAN perfecto' : 'SANes perfectos'}
             </Text>
           </View>
         )}

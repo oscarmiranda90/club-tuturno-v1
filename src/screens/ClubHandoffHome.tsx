@@ -70,7 +70,7 @@ export function ClubHandoffHome() {
         <DevControls
           club={demo.snapshot.club}
           onTier={demo.setTier}
-          onIncreaseStreak={demo.increaseStreak}
+          onIncreaseStreak={demo.completePerfectSan}
           onCompleteDiamondSan={demo.completeDiamondSan}
           onPaymentCelebration={demo.showPaymentCelebration}
           onTierCelebration={demo.showTierCelebration}

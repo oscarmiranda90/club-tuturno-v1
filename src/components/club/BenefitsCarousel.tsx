@@ -80,7 +80,7 @@ const SLIDES: readonly TierSlide[] = [
     standing: 'Tu punto de partida en el Club.',
     amountCaption: 'Hasta',
     amount: money(TIERS[0].maxSanAmount),
-    unlock: `Entras al Club automáticamente, sin inscribirte. Desde tu primer pago a tiempo empiezas a sumar puntos hacia ${money(TIERS[1].maxSanAmount)}.`,
+    unlock: `Entras al Club automáticamente, sin inscribirte. Desde tu primer pago a tiempo empiezas a sumar puntos hacia el nivel Plata (SANes de ${money(TIERS[1].maxSanAmount)}).`,
   },
   {
     tier: 'plata',
@@ -89,7 +89,7 @@ const SLIDES: readonly TierSlide[] = [
     standing: 'Vas creciendo dentro del Club.',
     amountCaption: 'Hasta',
     amount: money(TIERS[1].maxSanAmount),
-    unlock: `Con 300 puntos duplicas tu monto: de ${money(TIERS[0].maxSanAmount)} a ${money(TIERS[1].maxSanAmount)} por SAN. La medalla es tuya para siempre, pase lo que pase.`,
+    unlock: `Con 300 puntos alcanzas el nivel Plata y duplicas tu monto: de ${money(TIERS[0].maxSanAmount)} a ${money(TIERS[1].maxSanAmount)} por SAN. Esta Medalla es tuya para siempre, pase lo que pase.`,
   },
   {
     tier: 'oro',
@@ -98,7 +98,7 @@ const SLIDES: readonly TierSlide[] = [
     standing: 'Casi en la cima del Club.',
     amountCaption: 'Hasta',
     amount: money(TIERS[2].maxSanAmount),
-    unlock: `Con 800 puntos llegas a ${money(TIERS[2].maxSanAmount)} por SAN. Un paso más y entras a Diamante, donde el monto deja de tener tope.`,
+    unlock: `Con 800 puntos alcanzas el nivel Oro (SANes de ${money(TIERS[2].maxSanAmount)}). Un paso más y entras al nivel Diamante, donde el monto deja de tener tope.`,
   },
   {
     tier: 'diamante',
@@ -107,7 +107,7 @@ const SLIDES: readonly TierSlide[] = [
     standing: 'La cima. Montos sin tope.',
     amountCaption: 'Desde · sin tope',
     amount: money(TIERS[3].maxSanAmount),
-    unlock: `Con 1.500 puntos alcanzas la medalla más alta del Club. Desde ${money(TIERS[3].maxSanAmount)} tu monto ya no tiene tope: sigue creciendo por la escalera.`,
+    unlock: `Con 1.500 puntos alcanzas el nivel Diamante, la medalla más alta del Club. Desde ${money(TIERS[3].maxSanAmount)} tu monto ya no tiene tope: sigue creciendo por la escalera.`,
   },
 ] as const;
 
@@ -131,10 +131,20 @@ interface StreakRung {
 }
 
 const STREAK_RUNGS: readonly StreakRung[] = [
-  { sanes: 'Inicio', grants: '1 SAN a la vez' },
-  { sanes: '3 perfectos', grants: '2 SANes a la vez' },
-  { sanes: '6 perfectos', grants: '3 SANes a la vez' },
-  { sanes: '12 perfectos', grants: '4 SANes + 1 al 0% en Juntos' },
+  { sanes: 'Inicio', grants: 'Puedes jugar 1 SAN a la vez.' },
+  {
+    sanes: '3 perfectos',
+    grants: 'Completa 3 SANes perfectos y puedes jugar hasta 2 SANes a la vez.',
+  },
+  {
+    sanes: '6 perfectos',
+    grants: 'Completa 6 SANes perfectos y puedes jugar hasta 3 SANes a la vez.',
+  },
+  {
+    sanes: '12 perfectos',
+    grants:
+      'Completa 12 SANes perfectos. Juegas hasta 4 a la vez y 1 de tus SANes con 0% de comisión en Mod. Juntos. Los demás pagan comisión normal.',
+  },
 ] as const;
 
 /** The ladder rungs, built from the domain constants rather than typed out. */
@@ -659,19 +669,19 @@ function StreakPanel() {
         cuántos SANes juegas a la vez, sin importar tu nivel.
       </Text>
 
+      {/*
+        One sentence per rung, no chip beside it.
+
+        The rung used to be split in two — a fixed-width chip carrying "3
+        perfectos" and a grant beside it reading "2 SANes a la vez". Now that
+        each grant is written as a full sentence that names its own requirement,
+        the chip repeats the first half of the line it sits next to. A bullet
+        keeps the four rungs scannable as a ladder without saying it twice.
+      */}
       <View style={styles.streakRows}>
         {STREAK_RUNGS.map((rung) => (
           <View key={rung.sanes} style={styles.streakRow}>
-            <View
-              style={[
-                styles.streakChip,
-                { backgroundColor: theme.surface.inset },
-              ]}
-            >
-              <Text variant="labelSm" color="secondary">
-                {rung.sanes}
-              </Text>
-            </View>
+            <View style={[styles.streakBullet, { backgroundColor: theme.action.primary }]} />
             <Text variant="bodySm" style={styles.streakGrant}>
               {rung.grants}
             </Text>
@@ -988,17 +998,17 @@ const styles = StyleSheet.create({
   },
   streakRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // Top, not centre: each grant now runs to two or three lines, and a bullet
+    // centred against a three-line paragraph floats in the middle of it.
+    alignItems: 'flex-start',
     gap: spacing.sm,
   },
-  streakChip: {
-    // Fixed width so the four grants line up as a column rather than starting
-    // at four different x positions — the row reads as a ladder that way.
-    width: 96,
-    paddingVertical: spacing['2xs'],
-    paddingHorizontal: spacing.xs,
+  streakBullet: {
+    width: 5,
+    height: 5,
     borderRadius: radius.pill,
-    alignItems: 'center',
+    // Sits on the first line's optical centre rather than its top edge.
+    marginTop: 7,
   },
   streakGrant: {
     flex: 1,

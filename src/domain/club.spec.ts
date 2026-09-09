@@ -12,7 +12,7 @@
  * When one lands, these assertions move over unchanged.
  */
 
-import { rewardForPayment, clubUpdateForPayment, milestoneReached, reminderCopy, reactivationCopy, stepAfterDelinquency, displayName, advanceLadder, pointsForPayment, tierForPoints, eligibility, commissionForNewSan, delinquencyPhase, graceDaysLeft, projectNextTier, progressAfterCommittedSchedule, mascotMoodForClub, resolveClubPointsProgress } from './club';
+import { rewardForPayment, clubUpdateForPayment, reminderCopy, reactivationCopy, stepAfterDelinquency, streakAfterCompletedSan, displayName, advanceLadder, pointsForPayment, tierForPoints, eligibility, commissionForNewSan, delinquencyPhase, graceDaysLeft, projectNextTier, progressAfterCommittedSchedule, mascotMoodForClub, resolveClubPointsProgress } from './club';
 import type { ClubState, StreakStep } from './types';
 
 let fail = 0;
@@ -54,7 +54,6 @@ const diamante: ClubState = {
   points: { points: 2000, tier: 'diamante', pointsExpireAt: null },
   streak: { step: 12 as StreakStep, progressToNext: 0, zeroCommissionSanId: null },
   ladder: { currentMax: 500, completedAtCurrentMax: 0 },
-  cuotaStreak: 0,
 };
 eq('Diamante delinquent is blocked', eligibility(diamante, 1, true).canOpenNewSan, false);
 eq('Diamante clean can open', eligibility(diamante, 1, false).canOpenNewSan, true);
@@ -92,7 +91,6 @@ const bronce: ClubState = {
   points: { points: 144, tier: 'bronce', pointsExpireAt: null },
   streak: { step: 0 as StreakStep, progressToNext: 0, zeroCommissionSanId: null },
   ladder: null,
-  cuotaStreak: 8,
 };
 eq('Club hero points use the deterministic fallback', resolveClubPointsProgress(bronce, null), {
   currentPoints: 144, nextTier: 'plata', pointsNeeded: 156, fraction: 0.48,
@@ -112,7 +110,6 @@ const newAccount: ClubState = {
   points: { points: 0, tier: 'bronce', pointsExpireAt: null },
   streak: { step: 0, progressToNext: 0, zeroCommissionSanId: null },
   ladder: null,
-  cuotaStreak: 0,
 };
 
 eq('Tutu welcomes a new Club account', mascotMoodForClub(newAccount, false, false), 'idle');
@@ -153,19 +150,45 @@ eq('promotion points acknowledge the reached tier', juntosPromotion.reward.detai
   'Alcanzaste Plata');
 eq('Juntos promotion stores the new point total', juntosPromotion.club.points.points, 320);
 eq('Juntos promotion stores the new permanent medal', juntosPromotion.club.points.tier, 'plata');
-eq('a punctual payment moves the Club streak one quota', juntosPromotion.streak,
-  { before: 0, after: 1, milestone: null });
+// A payment earns points and moves nothing else. The streak buys simultaneous
+// SANes and the 0% commission, and it is not for sale by the installment: it
+// takes a whole SAN finished without a single late payment.
+eq('a punctual payment leaves the streak exactly where it was',
+  juntosPromotion.club.streak, nearPlata.streak);
 
 const noPromotion = clubUpdateForPayment(10, 'juntos', 'early', bronce);
 eq('the same payment update works without a promotion', noPromotion.points,
   { before: 144, earned: 40, after: 184 });
 eq('a normal point movement has no medal event', noPromotion.promotion, null);
-eq('the fifth perfect quota unlocks streak 6',
+// No number of punctual installments moves the streak. This used to assert that
+// a fifth one unlocked step 6 — five payments buying a benefit §3.1 prices at
+// six finished SANes.
+eq('a tenth punctual payment still leaves the streak alone',
   clubUpdateForPayment(10, 'juntos', 'onTime', {
     ...bronce,
     streak: { step: 3, progressToNext: 2, zeroCommissionSanId: null },
-  }).streak,
-  { before: 5, after: 6, milestone: 6 });
+  }).club.streak,
+  { step: 3, progressToNext: 2, zeroCommissionSanId: null });
+
+// §3.1 — the streak, in its own unit: whole SANes.
+eq('a completed perfect SAN advances lane 2 by one',
+  streakAfterCompletedSan({ step: 0, progressToNext: 0, zeroCommissionSanId: null }, false),
+  { step: 0, progressToNext: 1, zeroCommissionSanId: null });
+eq('the third perfect SAN reaches step 3',
+  streakAfterCompletedSan({ step: 0, progressToNext: 2, zeroCommissionSanId: null }, false).step,
+  3);
+eq('the sixth perfect SAN reaches step 6',
+  streakAfterCompletedSan({ step: 3, progressToNext: 2, zeroCommissionSanId: null }, false).step,
+  6);
+eq('the twelfth perfect SAN reaches step 12',
+  streakAfterCompletedSan({ step: 6, progressToNext: 5, zeroCommissionSanId: null }, false).step,
+  12);
+// A SAN that carried a late payment is not perfect, so it does not count. It
+// does not subtract either — the fall belongs to the delinquency episode, and
+// charging twice for one lateness would cost two steps.
+eq('a SAN completed with a late payment does not count',
+  streakAfterCompletedSan({ step: 3, progressToNext: 2, zeroCommissionSanId: null }, true),
+  { step: 3, progressToNext: 2, zeroCommissionSanId: null });
 
 const lateUpdate = clubUpdateForPayment(10, 'juntos', 'late', bronce);
 eq('a late confirmation keeps an explicit zero movement', lateUpdate.points,
@@ -187,16 +210,14 @@ const stillDiamante = clubUpdateForPayment(10, 'premium', 'onTime', expiredDiama
 eq('an earned medal never appears to move backward', stillDiamante.promotion, null);
 eq('an earned medal never moves backward in storage', stillDiamante.club.points.tier, 'diamante');
 
-eq('3 is a milestone', milestoneReached(3), 3);
-eq('24 is a milestone', milestoneReached(24), 24);
-eq('7 is not', milestoneReached(7), null);
-
-eq('a streak is put at stake',
-  reminderCopy(10, bronce, false).includes('racha de 8 pagos perfectos'), true);
-eq('no streak, an invitation instead',
-  reminderCopy(10, { ...bronce, cuotaStreak: 0 }, false).includes('empieza tu racha'), true);
+// §13.3 — what the day-before reminder puts at stake is the SAN in progress:
+// one late installment is what stops it being perfect.
+eq('an open SAN is what is put at stake',
+  reminderCopy(10, bronce, false, true).includes('Tu SAN perfecto está en juego'), true);
+eq('with no SAN open, an invitation instead',
+  reminderCopy(10, bronce, false, false).includes('empieza tu racha'), true);
 eq('0% outranks the streak line',
-  reminderCopy(10, bronce, true).includes('sin comisión'), true);
+  reminderCopy(10, bronce, true, true).includes('sin comisión'), true);
 
 eq('reactivation leads with the medal',
   (reactivationCopy(bronce, false) ?? '').includes('sigue intacta'), true);
@@ -291,7 +312,6 @@ const projecting: ClubState = {
   points: { points: 144, tier: 'bronce', pointsExpireAt: null },
   streak: { step: 0, progressToNext: 0, zeroCommissionSanId: null },
   ladder: null,
-  cuotaStreak: 0,
 };
 // Five installments left on the active SAN, quincenal, $10 in Modelo Juntos.
 const schedule = ['2026-09-05', '2026-09-20', '2026-10-05', '2026-10-20', '2026-11-04'];
