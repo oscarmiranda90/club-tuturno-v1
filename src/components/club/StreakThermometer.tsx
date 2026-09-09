@@ -302,7 +302,14 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', borderTopRightRadius: 8, borderBottomRightRadius: 8 },
   markerPoint: { position: 'absolute', right: -7, borderTopWidth: 7, borderBottomWidth: 7,
     borderLeftWidth: 8, borderTopColor: 'transparent', borderBottomColor: 'transparent' },
-  companion: { flex: 1, minWidth: 0, paddingRight: 24, paddingLeft: 4, alignItems: 'center' },
+  /*
+    The mascot stands on the floor of the column, not halfway up it. Without
+    an explicit end justification the bubble and mascot stack from the top,
+    leaving slack underneath — which reads as the caption sitting on top of
+    the mascot rather than below it.
+  */
+  companion: { flex: 1, minWidth: 0, paddingRight: 24, paddingLeft: 4,
+    alignItems: 'center', justifyContent: 'flex-end' },
   bubble: { borderWidth: 2,
     // Keep the cloud close to its longest line instead of spanning the companion column.
     borderRadius: 24, borderCurve, width: '80%', maxWidth: 190 },
