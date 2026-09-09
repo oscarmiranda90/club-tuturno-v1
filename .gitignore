@@ -6,4 +6,9 @@ web-build/
 .DS_Store
 android/
 ios/
-build-output/club-tuturno-v1-arm64-adaptive.apk
+# Build artifacts, not sources. Ignored by pattern rather than by filename:
+# the previous entry named one APK, so every later build showed up untracked
+# and one commit away from putting 100+ MB in the history for good.
+build-output/
+*.apk
+*.aab
