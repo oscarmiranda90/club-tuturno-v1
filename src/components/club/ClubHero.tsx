@@ -376,7 +376,7 @@ export function ClubHero({ club, progress, onOpenBenefits, onBack, compact = fal
           <View style={styles.amountRow}>
             <View style={styles.amountLabel}>
               {!compact && <Text variant="labelSm" color="secondary">Tu medalla</Text>}
-              <Text variant="labelSm" color="muted">Te da por SAN</Text>
+              <Text variant="labelSm" color="muted">Te da por San</Text>
             </View>
             <Text variant={compact ? "displaySm" : "display"} style={{ color: theme.status.success }}>
               {money(maxAmount)}
@@ -457,7 +457,7 @@ export function ClubHero({ club, progress, onOpenBenefits, onBack, compact = fal
                   </View>
                   <Text variant="labelSm" color="secondary">
                     {diamondCurrentMax < LADDER_CEILING
-                      ? 'Juega 2 SANes de tu monto actual sin mora y desbloquea el siguiente nivel.'
+                      ? 'Juega 2 Sanes de tu monto actual sin mora y desbloquea el siguiente nivel.'
                       : 'Llegaste al tope actual de la escalera. Es tuyo para siempre.'}
                   </Text>
                 </View>

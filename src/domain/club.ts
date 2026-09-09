@@ -733,7 +733,7 @@ export function eligibility(
     return {
       canOpenNewSan: false,
       reason:
-        'Con una cuota vencida activa no puedes abrir SANes nuevos. Regulariza (cuota + recargo) y sigues jugando.',
+        'Con una cuota vencida activa no puedes abrir Sanes nuevos. Regulariza (cuota + recargo) y sigues jugando.',
       maxAmount,
       simultaneousRemaining: remaining,
     };
@@ -743,7 +743,7 @@ export function eligibility(
     return {
       canOpenNewSan: false,
       reason: `Ya estás jugando ${benefits.simultaneousSanes} ${
-        benefits.simultaneousSanes === 1 ? 'SAN' : 'SANes'
+        benefits.simultaneousSanes === 1 ? 'San' : 'Sanes'
       } a la vez. Completa uno para abrir otro.`,
       maxAmount,
       simultaneousRemaining: 0,

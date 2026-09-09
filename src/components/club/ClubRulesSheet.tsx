@@ -58,11 +58,11 @@ const SECTIONS: readonly Section[] = [
     rules: [
       {
         term: 'Los puntos suben tu medalla',
-        text: 'Se ganan pagando cuotas a tiempo. Deciden tu medalla y el monto máximo de cada SAN.',
+        text: 'Se ganan pagando cuotas a tiempo. Deciden tu medalla y el monto máximo de cada San.',
       },
       {
-        term: 'Los SANes perfectos desbloquean beneficios',
-        text: 'Un SAN perfecto es uno completado con todos sus pagos a tiempo, de principio a fin. Deciden cuántos SANes juegas a la vez y el SAN al 0%.',
+        term: 'Los Sanes perfectos desbloquean beneficios',
+        text: 'Un San perfecto es uno completado con todos sus pagos a tiempo, de principio a fin. Deciden cuántos Sanes juegas a la vez y el San al 0%.',
       },
       {
         text: 'Puedes tener una medalla alta y una racha baja, o al revés. Son cuentas distintas y ninguna se calcula a partir de la otra.',
@@ -123,41 +123,41 @@ const SECTIONS: readonly Section[] = [
   {
     title: 'Los escalones de la racha',
     rules: [
-      { term: 'Inicio', text: 'Puedes jugar 1 SAN a la vez.' },
-      { term: '3 SANes perfectos', text: 'Puedes jugar hasta 2 SANes a la vez.' },
-      { term: '6 SANes perfectos', text: 'Puedes jugar hasta 3 SANes a la vez.' },
+      { term: 'Inicio', text: 'Puedes jugar 1 San a la vez.' },
+      { term: '3 Sanes perfectos', text: 'Puedes jugar hasta 2 Sanes a la vez.' },
+      { term: '6 Sanes perfectos', text: 'Puedes jugar hasta 3 Sanes a la vez.' },
       {
-        term: '12 SANes perfectos',
-        text: 'Juegas hasta 4 a la vez y 1 de tus SANes con 0% de comisión en Mod. Juntos. Los demás pagan comisión normal.',
+        term: '12 Sanes perfectos',
+        text: 'Juegas hasta 4 a la vez y 1 de tus Sanes con 0% de comisión en Mod. Juntos. Los demás pagan comisión normal.',
       },
-      { text: 'Los SANes simultáneos aplican en ambos modelos, y la racha cuenta SANes perfectos de cualquier modelo.' },
+      { text: 'Los Sanes simultáneos aplican en ambos modelos, y la racha cuenta Sanes perfectos de cualquier modelo.' },
     ],
   },
   {
-    title: 'El SAN al 0%',
+    title: 'El San al 0%',
     rules: [
       {
-        text: 'Aplica a un único SAN activo a la vez, y solo en Modelo Juntos. Los demás SANes que tengas abiertos pagan comisión normal.',
+        text: 'Aplica a un único San activo a la vez, y solo en Modelo Juntos. Los demás Sanes que tengas abiertos pagan comisión normal.',
       },
       {
         term: 'Lo asigna el sistema',
-        text: 'Lo lleva el primer SAN que abras con el beneficio activo. No se elige.',
+        text: 'Lo lleva el primer San que abras con el beneficio activo. No se elige.',
       },
       {
         term: 'Las condiciones se congelan al abrir',
-        text: 'Un SAN que arranca al 0% termina al 0%, incluso si caes en mora en el camino. Nunca se cobra comisión sobre las cuotas restantes de un SAN en curso.',
+        text: 'Un San que arranca al 0% termina al 0%, incluso si caes en mora en el camino. Nunca se cobra comisión sobre las cuotas restantes de un San en curso.',
       },
       {
-        term: 'El siguiente SAN se hereda con la racha activa',
-        text: 'Al culminar tu SAN al 0%, el próximo que abras hereda el beneficio, siempre que tu racha de 12 SANes perfectos siga activa.',
+        term: 'El siguiente San se hereda con la racha activa',
+        text: 'Al culminar tu San al 0%, el próximo que abras hereda el beneficio, siempre que tu racha de 12 Sanes perfectos siga activa.',
       },
       {
         term: 'Si lo pierdes, se recupera',
-        text: 'Caída la racha, completa 6 SANes perfectos consecutivos y el beneficio vuelve.',
+        text: 'Caída la racha, completa 6 Sanes perfectos consecutivos y el beneficio vuelve.',
       },
       { text: 'En Modelo Premium no hay 0% ni descuento, en ningún nivel.' },
       {
-        text: 'El beneficio recae únicamente sobre la comisión de servicio de TuTurno. Tu obligación de pagar las cuotas del SAN se mantiene íntegra en todos los casos.',
+        text: 'El beneficio recae únicamente sobre la comisión de servicio de TuTurno. Tu obligación de pagar las cuotas del San se mantiene íntegra en todos los casos.',
       },
     ],
   },
@@ -170,7 +170,7 @@ const SECTIONS: readonly Section[] = [
       },
       {
         term: 'Lo que desbloqueas es tuyo para siempre',
-        text: 'El conteo es acumulativo: una mora en el camino no borra los SANes ya contados ni baja el monto que alcanzaste.',
+        text: 'El conteo es acumulativo: una mora en el camino no borra los Sanes ya contados ni baja el monto que alcanzaste.',
       },
     ],
   },
@@ -188,15 +188,15 @@ const SECTIONS: readonly Section[] = [
         text: 'De 12 a 6, de 6 a 3, de 3 al inicio. Un episodio de mora cuesta un escalón, sin importar cuántas cuotas venzan dentro de él. Nunca caes dos de golpe.',
       },
       {
-        term: 'No abres SANes nuevos',
-        text: 'Con una cuota vencida activa sigues jugando los SANes que ya tienes, pero no entras a ninguno nuevo hasta ponerte al día con las cuotas vencidas y sus recargos.',
+        term: 'No abres Sanes nuevos',
+        text: 'Con una cuota vencida activa sigues jugando los Sanes que ya tienes, pero no entras a ninguno nuevo hasta ponerte al día con las cuotas vencidas y sus recargos.',
       },
       {
         term: 'La mora se cobra aparte',
         text: 'Con el Recargo por Gestión de Cobranza, no quitándote lo que ganaste.',
       },
       {
-        text: 'El progreso parcial hacia el siguiente escalón sí se pierde: si ibas por 4 SANes perfectos rumbo al 12, esos 4 vuelven a cero al caer.',
+        text: 'El progreso parcial hacia el siguiente escalón sí se pierde: si ibas por 4 Sanes perfectos rumbo al 12, esos 4 vuelven a cero al caer.',
       },
     ],
   },
@@ -215,7 +215,7 @@ const SECTIONS: readonly Section[] = [
     rules: [
       {
         term: 'Hacen falta las dos cosas',
-        text: 'Los puntos vencen tras 6 meses continuos sin participar en ningún SAN y sin iniciar sesión en la app. Basta con cualquiera de las dos para conservarlos: abrir la app ya cuenta.',
+        text: 'Los puntos vencen tras 6 meses continuos sin participar en ningún San y sin iniciar sesión en la app. Basta con cualquiera de las dos para conservarlos: abrir la app ya cuenta.',
       },
       {
         text: 'El vencimiento no afecta la medalla, que se conserva en todos los casos. Al volver acumulas desde 0 puntos manteniendo el nivel que alcanzaste.',

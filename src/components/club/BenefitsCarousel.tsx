@@ -131,19 +131,19 @@ interface StreakRung {
 }
 
 const STREAK_RUNGS: readonly StreakRung[] = [
-  { sanes: 'Inicio', grants: 'Puedes jugar 1 SAN a la vez.' },
+  { sanes: 'Inicio', grants: 'Puedes jugar 1 San a la vez.' },
   {
     sanes: '3 perfectos',
-    grants: 'Completa 3 SANes perfectos y puedes jugar hasta 2 SANes a la vez.',
+    grants: 'Completa 3 Sanes perfectos y puedes jugar hasta 2 Sanes a la vez.',
   },
   {
     sanes: '6 perfectos',
-    grants: 'Completa 6 SANes perfectos y puedes jugar hasta 3 SANes a la vez.',
+    grants: 'Completa 6 Sanes perfectos y puedes jugar hasta 3 Sanes a la vez.',
   },
   {
     sanes: '12 perfectos',
     grants:
-      'Completa 12 SANes perfectos. Juegas hasta 4 a la vez y 1 de tus SANes con 0% de comisión en Mod. Juntos. Los demás pagan comisión normal.',
+      'Completa 12 Sanes perfectos. Juegas hasta 4 a la vez y 1 de tus Sanes con 0% de comisión en Mod. Juntos. Los demás pagan comisión normal.',
   },
 ] as const;
 
@@ -664,9 +664,9 @@ function StreakPanel() {
         Y APARTE: TUS SANES PERFECTOS
       </Text>
       <Text variant="bodySm" color="secondary">
-        Un SAN perfecto es uno que completas pagando todas tus cuotas a tiempo.
+        Un San perfecto es uno que completas pagando todas tus cuotas a tiempo.
         Esta vía corre por separado y es igual en las cuatro medallas: decide
-        cuántos SANes juegas a la vez, sin importar tu nivel.
+        cuántos Sanes juegas a la vez, sin importar tu nivel.
       </Text>
 
       {/*
@@ -786,7 +786,7 @@ function LadderPanel() {
       </ScrollView>
 
       <Text variant="labelSm" color="muted">
-        Una mora en el camino no te borra el avance: tus SANes contados se
+        Una mora en el camino no te borra el avance: tus Sanes contados se
         quedan contados y tu monto desbloqueado no retrocede.
       </Text>
     </Animated.View>

@@ -101,18 +101,18 @@ export function StreakCelebration({ visible, from, to, onDone }: StreakCelebrati
                   <Text variant="labelSm" color="onBrandMuted">BENEFICIOS DE RACHA {to}</Text>
                   <Benefit label={`Hasta ${activeBenefits.simultaneousSanes} SANes a la vez`} />
                   {activeBenefits.zeroCommissionSan && (
-                    <Benefit label="1 SAN de Modelo Juntos sin comisión" />
+                    <Benefit label="1 San de Modelo Juntos sin comisión" />
                   )}
                 </View>
               ) : nextMilestone && nextBenefits ? (
                 <View style={[styles.benefits, { backgroundColor: theme.surface.brandInset }]}>
                   <Text variant="titleSm" color="onBrand" style={styles.center}>
-                    {nextMilestone - to} {nextMilestone - to === 1 ? 'SAN perfecto más' : 'SANes perfectos más'} y llegas a {nextMilestone}
+                    {nextMilestone - to} {nextMilestone - to === 1 ? 'San perfecto más' : 'Sanes perfectos más'} y llegas a {nextMilestone}
                   </Text>
                   <Text variant="labelSm" color="onBrandMuted">AL LLEGAR OBTIENES</Text>
                   <Benefit label={`Hasta ${nextBenefits.simultaneousSanes} SANes a la vez`} />
                   {nextBenefits.zeroCommissionSan && (
-                    <Benefit label="1 SAN de Modelo Juntos sin comisión" />
+                    <Benefit label="1 San de Modelo Juntos sin comisión" />
                   )}
                 </View>
               ) : (

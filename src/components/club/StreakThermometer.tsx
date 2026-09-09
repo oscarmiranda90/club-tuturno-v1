@@ -33,7 +33,7 @@ const MILESTONES = [3, 6, 9, 12] as const;
   the reader to supply their own unit, and the one they reach for is the
   payment they just made.
 */
-const LANE_LABEL = 'Racha de SANes perfectos';
+const LANE_LABEL = 'Racha de Sanes perfectos';
 
 interface StreakMeterCelebration {
   /** The confirmed perfect-SAN count before the SAN that just completed. */
@@ -252,9 +252,9 @@ export function StreakThermometer({ club, blocked, compact, scale = 1, celebrati
             <Text variant="bodySm" color="secondary" style={styles.center}>
               {celebration ? celebration.arrived
                 ? 'Tu racha acaba de subir.'
-                : 'Tu SAN perfecto ya está contando.'
-                : blocked ? 'Ponte al día para volver a jugar SANes.'
-                : `Puedes jugar ${benefits.simultaneousSanes} ${benefits.simultaneousSanes === 1 ? 'SAN' : 'SANes'} a la vez.`}
+                : 'Tu San perfecto ya está contando.'
+                : blocked ? 'Ponte al día para volver a jugar Sanes.'
+                : `Puedes jugar ${benefits.simultaneousSanes} ${benefits.simultaneousSanes === 1 ? 'San' : 'Sanes'} a la vez.`}
             </Text>
             <View style={[styles.tail, { backgroundColor: theme.surface.raised,
               borderBottomColor: theme.text.primary, borderRightColor: theme.text.primary }]} />
@@ -273,8 +273,8 @@ export function StreakThermometer({ club, blocked, compact, scale = 1, celebrati
         style={[styles.caption, { paddingTop: scaled(8, scale) }]}
       >
         {benefits.zeroCommissionSan
-          ? '1 SAN sin comisión en Modelo Juntos, mientras tu racha siga perfecta.'
-          : 'Completa SANes con todos sus pagos a tiempo para subir tu racha.'}
+          ? '1 San sin comisión en Modelo Juntos, mientras tu racha siga perfecta.'
+          : 'Completa Sanes con todos sus pagos a tiempo para subir tu racha.'}
       </Text>
     </View>
   );

@@ -115,7 +115,7 @@ export function ClubProgress({ club, onPress, tone = 'default' }: ClubProgressPr
               />
             </Svg>
             <Text variant="labelSm" style={{ color: secondary }}>
-              {perfectSanes} {perfectSanes === 1 ? 'SAN perfecto' : 'SANes perfectos'}
+              {perfectSanes} {perfectSanes === 1 ? 'San perfecto' : 'Sanes perfectos'}
             </Text>
           </View>
         )}
