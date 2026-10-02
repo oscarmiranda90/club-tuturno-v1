@@ -59,6 +59,122 @@ Consulta:
 - [Inventario de pantallas y capturas](docs/SCREEN_INVENTORY.md)
 - [Generación del APK](docs/BUILD_ANDROID.md)
 
+## Three.js explicado para principiantes y backend
+
+Three.js es una biblioteca de JavaScript que dibuja objetos en tres dimensiones.
+En este proyecto hace que la medalla tenga profundidad, iluminación y movimiento:
+el usuario puede arrastrarla para girarla. La escena se dibuja en el dispositivo
+del usuario; el backend entrega el estado del Club que decide qué medalla mostrar.
+
+### Cómo se convierte un dato en una medalla 3D
+
+```text
+Backend o demo local
+        ↓
+ClubSnapshot: estado del Club
+        ↓
+club.points.tier: bronce, plata, oro o diamante
+        ↓
+Pantalla del Club → componente de medalla → escena Three.js
+```
+
+Por ejemplo, si el servidor devuelve `club.points.tier: "oro"`, la pantalla
+selecciona la imagen de Oro, el color del borde y sus destellos. Cambiar ese campo
+en el snapshot actualizado permite mostrar otra medalla.
+
+Estos son los conceptos básicos de la escena:
+
+| Concepto | Qué significa aquí |
+| --- | --- |
+| Escena | El espacio donde están la medalla, las luces y los efectos. |
+| Cámara | El punto de vista desde el que vemos la medalla. |
+| Geometría | La forma del objeto: un cilindro para el cuerpo y círculos para las caras. |
+| Textura | La imagen WebP de la medalla colocada sobre sus caras. |
+| Material | La apariencia de la superficie: color, brillo y acabado metálico. |
+| Animación | Pequeños cambios de giro y efectos en cada cuadro de la imagen. |
+
+La moneda se construye con código y con imágenes incluidas en `assets`. No
+requiere descargar un modelo 3D desde el servidor.
+
+### Dónde está implementado
+
+- [BronzeCoin3D.dom.tsx](src/components/club/BronzeCoin3D.dom.tsx) construye la
+  escena. Aunque su nombre menciona Bronce, maneja las cuatro medallas.
+- [InteractiveBronzeMedal.tsx](src/components/club/InteractiveBronzeMedal.tsx)
+  contiene `InteractiveTierMedal`, el componente que recibe el nivel y el tamaño.
+  Muestra una medalla estática mientras carga la escena y la retira al recibir
+  la señal `onReady`.
+- [StaticTierMedal.tsx](src/components/club/StaticTierMedal.tsx) muestra la imagen
+  estática, que también se usa en superficies pequeñas.
+
+La escena utiliza **React Three Fiber**, que permite escribir objetos de
+Three.js como componentes React. `<Canvas>` es la superficie de dibujo y
+`useFrame()` actualiza el movimiento en cada cuadro. El arrastre cambia el giro;
+al soltar, la moneda conserva inercia y luego continúa girando lentamente. Oro
+tiene destellos y Diamante añade un halo.
+
+La directiva `'use dom'` del archivo de la escena indica que contiene una vista
+web. Expo la aloja dentro de una WebView en móvil, donde WebGL dibuja el 3D.
+El componente de React Native le pasa el nivel de la medalla y recibe la señal
+de que está lista para mostrarse.
+
+### Qué debe conectar el equipo de backend
+
+`ClubSnapshot` es el contrato de datos: describe la estructura que espera la
+interfaz. Está definido junto con `ClubRepository` en
+[clubContract.ts](src/data/clubContract.ts).
+
+Este es un ejemplo completo de un snapshot de Bronce:
+
+```json
+{
+  "club": {
+    "points": {
+      "points": 144,
+      "tier": "bronce",
+      "pointsExpireAt": null
+    },
+    "streak": {
+      "step": 0,
+      "progressToNext": 2,
+      "zeroCommissionSanId": null
+    },
+    "ladder": null,
+    "cuotaStreak": 2
+  },
+  "isDelinquent": false,
+  "hasActiveSan": true,
+  "pointsProgress": null
+}
+```
+
+El servidor es responsable de los puntos, la medalla, la racha, la escalera
+Diamante y el estado de mora. Los colores, las luces, las texturas y el giro
+están definidos en el cliente y no necesitan campos adicionales en la API.
+
+Para conectar la aplicación:
+
+1. Implementar `ClubRepository.getSnapshot()` con el cliente HTTP de la app.
+   Ese método devuelve una promesa con el `ClubSnapshot` recibido del servidor.
+2. Sustituir `useClubDemo()` en
+   [ClubHandoffHome.tsx](src/screens/ClubHandoffHome.tsx) por el hook o store real,
+   es decir, la pieza que obtiene y mantiene los datos de la API.
+3. Pasar el snapshot actualizado a `ClubProgress` y `ClubScreen`. Los componentes
+   visuales ya usan ese contrato.
+4. Después de confirmar un pago, entregar el snapshot actualizado junto con
+   `PaymentClubUpdate` para mostrar la celebración con los resultados confirmados.
+5. Retirar los datos y controles de demostración antes de producción.
+
+La medalla desbloqueada es permanente y no baja por una reducción de puntos.
+Puntos y racha son independientes: **la racha de beneficios cuenta SANes
+completos perfectos, no cuotas pagadas a tiempo**. `cuotaStreak` es un contador
+motivacional separado y no debe usarse para avanzar esa racha. Las animaciones
+muestran el resultado confirmado; no conceden puntos ni beneficios.
+
+Para probar el recorrido sin backend, ejecuta `npm start`, abre el Club y usa
+los controles DEV para cambiar la medalla. Para implementar las reglas y los
+eventos, consulta [Contrato e integración de backend](docs/BACKEND_INTEGRATION.md).
+
 ## Stack congelado para esta entrega
 
 - Expo SDK 57
